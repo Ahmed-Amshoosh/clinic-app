@@ -9,6 +9,12 @@ import 'package:graduation_project/widgets/Mybottom.dart';
 
 import '../../controller/modeController.dart';
 
+// ipa
+
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
 class Appointments extends StatefulWidget {
   const Appointments({super.key});
 
@@ -17,6 +23,34 @@ class Appointments extends StatefulWidget {
 }
 
 class _AppointmentsState extends State<Appointments> {
+  // =================================
+
+  List<dynamic> appointments = [];
+
+  // دالة لجلب البيانات من API
+  Future<void> fetchData() async {
+    final response = await http
+        .get(Uri.parse('http://192.168.120.27:8000/api/appointments'));
+
+    if (response.statusCode == 200) {
+      // تحويل النص JSON إلى كائن Dart
+      setState(() {
+        appointments = json.decode(response.body);
+      });
+    } else {
+      // في حال فشل الطلب
+      throw Exception('Failed to load data');
+    }
+  }
+
+  List<dynamic> filterappointmentsByStat(String status) {
+    return appointments.where((appointment) {
+      return appointment['status'] == status;
+    }).toList();
+  }
+
+  // =================================
+
   List data = [];
   bool loading = true;
 
@@ -60,6 +94,7 @@ class _AppointmentsState extends State<Appointments> {
   void initState() {
     getData();
     datauser();
+    fetchData();
     super.initState();
   }
 
@@ -91,10 +126,11 @@ class _AppointmentsState extends State<Appointments> {
                       // width: 200,
                       height: MediaQuery.of(context).size.height - 200,
                       child: ListView.builder(
-                        itemCount: data.length,
+                        itemCount: filterappointmentsByStat('pending').length,
                         itemBuilder: (context, index) {
                           // ignore: avoid_print
-                          print(data.length);
+                          final pendingAppoit = filterappointmentsByStat('pending')[index];
+                          print(appointments.length);
                           return Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Center(
@@ -113,7 +149,7 @@ class _AppointmentsState extends State<Appointments> {
                                     ListTile(
                                       // isThreeLine: true,
 
-                                      title: Text(data[index]['name'],
+                                      title: Text(pendingAppoit['name'],
                                           style: const TextStyle(
                                               fontSize: 18,
                                               color: Color(0xff1652A4))),
@@ -123,7 +159,8 @@ class _AppointmentsState extends State<Appointments> {
                                             fontSize: 18,
                                             color: Color(0xff1652A4)),
                                       ),
-                                      trailing: Text(data[index]['appoint'],
+                                      trailing: Text(
+                                          pendingAppoit['date'],
                                           style: const TextStyle(
                                               fontSize: 15,
                                               color: Color(0xff1652A4))),
@@ -132,7 +169,8 @@ class _AppointmentsState extends State<Appointments> {
                                         ? const Center(
                                             child: CircularProgressIndicator(),
                                           )
-                                        : datau[0]['statUs'] == 1
+                                        // : datau[0]['statUs'] == 1
+                                        : false == 1
                                             ? Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.center,
@@ -189,7 +227,6 @@ class _AppointmentsState extends State<Appointments> {
                                                                               await FirebaseFirestore.instance.collection("appointment").doc(data[index].id).delete();
                                                                               setState(() {});
 
-                                                                          
                                                                               Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyAppointment()));
                                                                             },
                                                                             bcColor:

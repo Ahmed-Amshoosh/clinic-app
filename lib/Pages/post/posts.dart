@@ -15,6 +15,7 @@ import 'package:readmore/readmore.dart';
 import '../../controller/modeController.dart';
 import '../colors/colors.dart';
 import 'package:http/http.dart' as http;
+// ipa
 
 class Posts extends StatefulWidget {
   const Posts({super.key});
@@ -22,51 +23,7 @@ class Posts extends StatefulWidget {
   @override
   State<Posts> createState() => _PostsState();
 }
-class Album {
-  final int id;
-  final String title;
-  final String desc;
-  final String image;
 
-  const Album({
-    required this.id,
-    required this.desc,
-    required this.image,
-    required this.title,
-  });
-
-  factory Album.fromJson(Map<String, dynamic> json) {
-    return switch (json) {
-      {
-        'desc': String desc,
-        'image': String image,
-        'id': int id,
-        'title': String title,
-      } =>
-        Album(
-          id: id,
-          desc: desc,
-          image: image,
-          title: title,
-        ),
-      _ => throw const FormatException('Failed to load album.'),
-    };
-  }
-}
-Future<Album> fetchAlbum() async {
-  final response =
-      await http.get(Uri.parse('http://192.168.31.97:8000/api/post'));
-
-  if (response.statusCode == 200) {
-    // If the server did return a 200 OK response,
-    // then parse the JSON.
-    return Album.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
-  } else {
-    // If the server did not return a 200 OK response,
-    // then throw an exception.
-    throw Exception('Failed to load album');
-  }
-}
 class _PostsState extends State<Posts> {
   CollectionReference post = FirebaseFirestore.instance.collection('post');
 
@@ -98,17 +55,31 @@ class _PostsState extends State<Posts> {
     loading = false;
   }
 
+  List<dynamic> posts = [];
+
+  // دالة لجلب البيانات من API
+  Future<void> fetchData() async {
+    final response =
+        await http.get(Uri.parse('http://192.168.120.27:8000/api/posts'));
+
+    if (response.statusCode == 200) {
+      // تحويل النص JSON إلى كائن Dart
+      setState(() {
+        posts = json.decode(response.body);
+      });
+    } else {
+      // في حال فشل الطلب
+      throw Exception('Failed to load data');
+    }
+  }
+
   @override
   void initState() {
-    getData();
+    // getData();
+    fetchData();
     datauser();
     super.initState();
   }
-
-
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -149,7 +120,8 @@ class _PostsState extends State<Posts> {
               ? const Center(
                   child: CircularProgressIndicator(),
                 )
-              : datau[0]['statUs'] == 1
+              : false
+              // : datau[0]['statUs'] == 1
                   ? IconButton(
                       onPressed: () {
                         Navigator.pushReplacement(
@@ -175,7 +147,7 @@ class _PostsState extends State<Posts> {
                 ? const Center(
                     child: CircularProgressIndicator(),
                   )
-                : data.isEmpty
+                : posts.isEmpty
                     ? const Center(
                         child: Text(
                           "لاتوجد نصايح طبية",
@@ -185,10 +157,11 @@ class _PostsState extends State<Posts> {
                               fontSize: 25),
                         ),
                       )
-                    : SizedBox(
+                    :
+                     SizedBox(
                         height: MediaQuery.of(context).size.height - 120,
                         child: ListView.builder(
-                          itemCount: data.length,
+                          itemCount: posts.length,
                           itemBuilder: (context, index) {
                             return InkWell(
                               onTap: () {
@@ -197,10 +170,11 @@ class _PostsState extends State<Posts> {
                                     MaterialPageRoute(
                                         builder: (context) => Post(
                                               name: datau[0]['name'],
-                                              desc: data[index]['desc'],
-                                              image: data[index]['image'],
-                                              time: data[index]['time'],
-                                              title: data[index]['title'],
+                                              short_desc: posts[index]['short_desc'],
+                                              big_desc: posts[index]['big_desc'],
+                                              image: posts[index]['image'],
+                                              time: posts[index]['created_at'],
+                                              title: posts[index]['title'],
                                             )));
                               },
                               child: Container(
@@ -242,9 +216,9 @@ class _PostsState extends State<Posts> {
                                                 children: [
                                                   Text(
                                                       datau.isNotEmpty
-                                                          ? "title".tr() +
+                                                          ? 
                                                               datau[0]['name']
-                                                          : "title".tr(),
+                                                          : '',
                                                       style: TextStyle(
                                                           color: darkmode!
                                                               ? const Color
@@ -256,8 +230,13 @@ class _PostsState extends State<Posts> {
                                                               FontWeight.bold,
                                                           fontSize: 17)),
                                                   Text(
-                                                    data[index]['time']
-                                                        .toString(),
+                                                    DateFormat('yyyy/MM/dd')
+                                                    .format(
+                                                        DateTime.parse(posts[
+                                                                index][
+                                                            'created_at']) // Parse the String to DateTime
+                                                        ),
+                                                 
                                                     style: const TextStyle(
                                                         color: Colors.grey),
                                                   ),
@@ -265,7 +244,7 @@ class _PostsState extends State<Posts> {
                                               )
                                             ],
                                           ),
-                                          datau[0]['statUs'] == 1
+                                          false == 1
                                               ? Row(
                                                   children: [
                                                     IconButton(
@@ -280,7 +259,7 @@ class _PostsState extends State<Posts> {
                                                                             title:
                                                                                 data[index]['title'],
                                                                             desc:
-                                                                                data[index]['desc'],
+                                                                                data[index]['short_desc'],
                                                                             image:
                                                                                 data[index]['image'],
                                                                           )));
@@ -351,7 +330,7 @@ class _PostsState extends State<Posts> {
                                                   right: 10, top: 5),
                                               alignment: Alignment.topRight,
                                               child: Text(
-                                                data[index]['title'],
+                                                posts[index]['title'],
                                                 style: TextStyle(
                                                     color: darkmode!
                                                         ? const Color.fromARGB(
@@ -369,7 +348,7 @@ class _PostsState extends State<Posts> {
                                               // trimLines: 6,
                                               // maxLines: 3,
                                               // overflow: TextOverflow.visible,
-                                              data[index]['desc'],
+                                              posts[index]['short_desc'],
                                               style: TextStyle(
                                                   color: darkmode!
                                                       ? const Color.fromARGB(
@@ -388,7 +367,8 @@ class _PostsState extends State<Posts> {
                                             borderRadius:
                                                 BorderRadius.circular(20),
                                             child: Image.network(
-                                              data[index]['image'],
+                                              'http://192.168.120.27:8000/images/${posts[index]['image']}',
+                                            
                                               height: 200,
                                               width: double.infinity,
                                               fit: BoxFit.fill,
@@ -448,7 +428,6 @@ class _PostsState extends State<Posts> {
                                 ),
                               ),
                             );
-                        
                           },
                         )),
           ],

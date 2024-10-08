@@ -4,11 +4,18 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:graduation_project/Pages/appointment/Appointment.dart';
 
 import '../../controller/modeController.dart';
+
+// ipa
+
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class MyAppointments extends StatefulWidget {
   const MyAppointments({super.key});
@@ -31,18 +38,77 @@ class _MyAppointmentsState extends State<MyAppointments> {
     // // await FirebaseFirestore.instance.collection("infouser").get();
     // for (var i = 0; i < querySnapshot.docs.length; i++) {
     //   if (querySnapshot.docs[i]['state'] == false) {
-        data.addAll(querySnapshot.docs);
-        setState(() {});
-      // }
+    data.addAll(querySnapshot.docs);
+    setState(() {});
+    // }
     // }
     // print(querySnapshot.docs[0]['state']);
     loading = false;
   }
 
+  List<dynamic> appointments = [];
+
+  // دالة لجلب البيانات من API
+  Future<void> fetchData() async {
+    final response = await http
+        .get(Uri.parse('http://192.168.120.27:8000/api/appointments'));
+
+    if (response.statusCode == 200) {
+      // تحويل النص JSON إلى كائن Dart
+      setState(() {
+        appointments = json.decode(response.body);
+      });
+    } else {
+      // في حال فشل الطلب
+      throw Exception('Failed to load data');
+    }
+  }
+
+  List<dynamic> filterappointmentsByUserID(String user_id) {
+    return appointments.where((appointment) {
+      return appointment['user_id'] == user_id;
+    }).toList();
+  }
+
+  // =================================
+
+  Future<void> deleteAppoit(int id) async {
+    final String apiUrl =
+        'http://192.168.120.27:8000/api/delete-appoitment/${id}';
+    // Prepare data to be sent
+    var data = {'id': id};
+
+    // Send POST request to the Laravel backend
+    try {
+      print(data);
+      var response = await http.delete(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json', // Define the headers
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('Doctor deleted successfully');
+      } else {
+        print('Failed to delete doctor: ${response.body}');
+      }
+    } catch (e) {
+      // Handle any exceptions
+      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('An error occurred'),
+      ));
+    }
+  }
+
+  // ========================================================================================================
+
   @override
   void initState() {
     getData();
-
+    fetchData();
     super.initState();
   }
 
@@ -53,7 +119,7 @@ class _MyAppointmentsState extends State<MyAppointments> {
             child: CircularProgressIndicator(),
           )
         : data.isEmpty
-            ?  Center(
+            ? Center(
                 child: Text(
                 "there_are_no_appointments".tr(),
                 style: const TextStyle(fontSize: 30, color: Color(0xff1654A2)),
@@ -65,8 +131,12 @@ class _MyAppointmentsState extends State<MyAppointments> {
                     child: Container(
                       height: 800,
                       child: ListView.builder(
-                        itemCount: data.length,
+                        itemCount: filterappointmentsByUserID(
+                                FirebaseAuth.instance.currentUser!.uid)
+                            .length,
                         itemBuilder: (context, index) {
+                          final myAppoints = filterappointmentsByUserID(
+                              FirebaseAuth.instance.currentUser!.uid)[index];
                           return Container(
                               width: double.infinity,
                               margin: const EdgeInsets.all(5),
@@ -75,8 +145,9 @@ class _MyAppointmentsState extends State<MyAppointments> {
                                   border: Border.all(
                                     color: const Color.fromARGB(15, 0, 31, 68),
                                   ),
-                                color:darkmode!? const Color.fromARGB(255, 180, 180, 180):Colors.white,
-
+                                  color: darkmode!
+                                      ? const Color.fromARGB(255, 180, 180, 180)
+                                      : Colors.white,
                                   borderRadius: BorderRadius.circular(10)),
                               child: Container(
                                 // height: 80,
@@ -89,42 +160,51 @@ class _MyAppointmentsState extends State<MyAppointments> {
                                               fontSize: 18,
                                               color: Color.fromARGB(
                                                   255, 22, 82, 164))),
-                                      title: Text(data[index]['name'],
+                                      title: Text(myAppoints['name'],
                                           style: const TextStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold,
                                               color: Color(0xff1652A4))),
                                       // ignore: avoid_unnecessary_containers
                                       trailing: Container(
-                                        child: Text(data[index]['appoint'],
+                                        child: Text(myAppoints['date'],
                                             style: const TextStyle(
                                                 fontSize: 15,
                                                 color: Color(0xff1652A4))),
                                       ),
                                     ),
                                     Container(
-                                      // color: Colors.red,
+                                        // color: Colors.red,
                                         padding: const EdgeInsets.only(
                                             right: 30, bottom: 10),
                                         width: double.infinity,
-                                        child: Text(data[index]['perblem'],
+                                        child: Text(myAppoints['problem'],
                                             style: const TextStyle(
                                                 fontSize: 15,
                                                 color: Color(0xff1652A4)))),
                                     InkWell(
                                       onTap: () async {
-                                        // print(data[index].id);
-                                        await FirebaseFirestore.instance
-                                            .collection("appointment")
-                                            .doc(data[index].id)
-                                            .delete();
-                                        // Navigator.push(context, MaterialPageRoute(builder: (context)=> MyAppointments()));
-                                        Navigator.pushReplacement(
+                                        deleteAppoit(myAppoints['id']);
+
+                                             Navigator.pushReplacement(
                                             // ignore: use_build_context_synchronously
                                             context,
                                             MaterialPageRoute(
                                                 builder: (context) =>
                                                     const MyAppointment()));
+
+                                        // print(data[index].id);
+                                        // await FirebaseFirestore.instance
+                                        //     .collection("appointment")
+                                        //     .doc(data[index].id)
+                                        //     .delete();
+                                        // // Navigator.push(context, MaterialPageRoute(builder: (context)=> MyAppointments()));
+                                        // Navigator.pushReplacement(
+                                        //     // ignore: use_build_context_synchronously
+                                        //     context,
+                                        //     MaterialPageRoute(
+                                        //         builder: (context) =>
+                                        //             const MyAppointment()));
                                         // Navigator.pop(context);
                                       },
                                       child: Container(
@@ -137,8 +217,8 @@ class _MyAppointmentsState extends State<MyAppointments> {
                                             color: const Color(0xff1654A2),
                                             borderRadius:
                                                 BorderRadius.circular(15)),
-                                        child:  Text(
-                                        "delete".tr(),
+                                        child: Text(
+                                          "delete".tr(),
                                           style: const TextStyle(
                                               color: Colors.white,
                                               fontSize: 18),

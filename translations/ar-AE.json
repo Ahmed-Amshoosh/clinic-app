@@ -29,6 +29,7 @@
   "there_are_no_notifications":"لاتوجد ااي اشعارات ",
   "do_you_want_to_delete_this_notification":"هل تريد حذف هذا الاشعار?",
   "patient_name":"اسم المريض",
+  "patient_number":"رقم المريض",
   "patient_age":"عمر المريض",
   "patient_gender":"جنس المريض",
   "patient_problem":"شكوى المريض",

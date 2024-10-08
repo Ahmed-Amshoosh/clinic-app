@@ -5,6 +5,8 @@ import 'package:graduation_project/Pages/colors/colors.dart';
 import 'package:graduation_project/controller/modeController.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+
+
 class DoctorsDetails extends StatefulWidget {
   const DoctorsDetails(
       {super.key,
@@ -13,13 +15,19 @@ class DoctorsDetails extends StatefulWidget {
       required this.cat,
       required this.exper,
       required this.sick,
-      required this.eval, required this.location});
+      required this.eval,
+      required this.location, required this.desc, required this.facebook, required this.email, required this.phone, required this.whatsapp});
   final String name;
   final String image;
   final String cat;
   final String exper;
   final String sick;
   final String eval;
+  final String desc;
+  final String facebook;
+  final String email;
+  final String phone;
+  final String whatsapp;
   final String location;
 
   @override
@@ -27,6 +35,8 @@ class DoctorsDetails extends StatefulWidget {
 }
 
 class _DoctorsState extends State<DoctorsDetails> {
+
+
   // Future<void> urLauncher(String url) async {
   //   final Uri _url = Uri.parse(url);
   //   if (await canLaunchUrl(_url)) {
@@ -50,37 +60,36 @@ class _DoctorsState extends State<DoctorsDetails> {
         child: Scaffold(
           // backgroundColor: const Color(0xFF7165D6),
           appBar: AppBar(
-              leading: IconButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  icon: Icon(
-                    Icons.arrow_back,
-                    size: 30,
-                    color: darkmode!
-                        ? const Color.fromARGB(255, 238, 238, 238)
-                        : const Color(0xff1652A4),
-                  )),
-              title: Text(
-              
-                widget.name,
-                style: TextStyle(
-                    fontSize: 25,
-                    color: darkmode!
-                        ? const Color.fromARGB(255, 238, 238, 238)
-                        : const Color(0xff1652A4),
-                    fontWeight: FontWeight.bold),
-              ),
-              centerTitle: true,
-              backgroundColor: darkmode!
-                  ? bacgroundDarkMode
-                  : Color.fromARGB(255, 253, 253, 253) // Colors.white,
-                  ,
+            leading: IconButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: Icon(
+                  Icons.arrow_back,
+                  size: 30,
+                  color: darkmode!
+                      ? const Color.fromARGB(255, 238, 238, 238)
+                      : const Color(0xff1652A4),
+                )),
+            title: Text(
+              widget.name,
+              style: TextStyle(
+                  fontSize: 25,
+                  color: darkmode!
+                      ? const Color.fromARGB(255, 238, 238, 238)
+                      : const Color(0xff1652A4),
+                  fontWeight: FontWeight.bold),
+            ),
+            centerTitle: true,
+            backgroundColor: darkmode!
+                ? bacgroundDarkMode
+                : Color.fromARGB(255, 253, 253, 253) // Colors.white,
+            ,
             // backgroundColor: darkmode! ? bacgroundDarkMode: Colors.white,
-              // elevation: ,
-              ),
+            // elevation: ,
+          ),
           // backgroundColor: darkmode! ? bacgroundDarkMode : Colors.white,
-      backgroundColor: darkmode! ? bacgroundDarkMode: Colors.white,
+          backgroundColor: darkmode! ? bacgroundDarkMode : Colors.white,
 
           body: SingleChildScrollView(
             child: Column(
@@ -97,7 +106,7 @@ class _DoctorsState extends State<DoctorsDetails> {
                           children: [
                             CircleAvatar(
                               radius: 60,
-                              backgroundImage: AssetImage(widget.image),
+                              backgroundImage:  NetworkImage('http://192.168.120.27:8000/images/doctor/${widget.image}'),
                             ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -107,19 +116,32 @@ class _DoctorsState extends State<DoctorsDetails> {
                                   style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
-                                      color:darkmode!? const Color.fromARGB(255, 59, 144, 247):const Color(0xff1654A2)),
+                                      color: darkmode!
+                                          ? const Color.fromARGB(
+                                              255, 59, 144, 247)
+                                          : const Color(0xff1654A2)),
                                 ),
                                 Text(
                                   widget.cat,
                                   style: TextStyle(
                                       fontSize: 18,
-color:darkmode! ? const Color.fromARGB(255, 206, 206, 206): const Color.fromARGB(255, 99, 98, 98),                                      fontWeight: FontWeight.w500),
+                                      color: darkmode!
+                                          ? const Color.fromARGB(
+                                              255, 206, 206, 206)
+                                          : const Color.fromARGB(
+                                              255, 99, 98, 98),
+                                      fontWeight: FontWeight.w500),
                                 ),
                                 Text(
-                                  "اليمن , حضرموت , سيئون",
+                                  widget.location,
                                   style: TextStyle(
                                       fontSize: 18,
-color:darkmode! ? const Color.fromARGB(255, 206, 206, 206): const Color.fromARGB(255, 99, 98, 98),                                      fontWeight: FontWeight.w500),
+                                      color: darkmode!
+                                          ? const Color.fromARGB(
+                                              255, 206, 206, 206)
+                                          : const Color.fromARGB(
+                                              255, 99, 98, 98),
+                                      fontWeight: FontWeight.w500),
                                 ),
                               ],
                             ),
@@ -199,57 +221,30 @@ color:darkmode! ? const Color.fromARGB(255, 206, 206, 206): const Color.fromARGB
                           decoration: BoxDecoration(
                               color: const Color.fromARGB(162, 192, 220, 252),
                               borderRadius: BorderRadius.circular(50)),
-                          child: Icon(
-                            Icons.people_alt,
-                            size: 28,
-                            color:darkmode!? const Color.fromARGB(255, 59, 144, 247):const Color(0xff1654A2)
-                
-                          ),
+                          child: Icon(Icons.people_alt,
+                              size: 28,
+                              color: darkmode!
+                                  ? const Color.fromARGB(255, 59, 144, 247)
+                                  : const Color(0xff1654A2)),
                         ),
                         const SizedBox(
                           height: 10,
                         ),
-                         Text(
+                        Text(
                           "${widget.sick}+",
                           style: TextStyle(
-                            color:darkmode!? const Color.fromARGB(255, 59, 144, 247):const Color(0xff1654A2),
+                              color: darkmode!
+                                  ? const Color.fromARGB(255, 59, 144, 247)
+                                  : const Color(0xff1654A2),
                               fontWeight: FontWeight.bold,
                               fontSize: 22),
                         ),
-                         Text(
+                        Text(
                           "مرضى",
                           style: TextStyle(
-                color:darkmode! ? const Color.fromARGB(255, 206, 206, 206): const Color.fromARGB(255, 99, 98, 98),                                fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(15),
-                          decoration: BoxDecoration(
-                              color: const Color.fromARGB(162, 192, 220, 252),
-                              borderRadius: BorderRadius.circular(50)),
-                          child:  Icon(
-                            Icons.cases_outlined,
-                            size: 28,
-                            color:darkmode!? const Color.fromARGB(255, 59, 144, 247):const Color(0xff1654A2),
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                         Text(
-                          "${widget.exper}+",
-                          style: TextStyle(
-                            color:darkmode!? const Color.fromARGB(255, 59, 144, 247):const Color(0xff1654A2),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 22),
-                        ),
-                         Text(
-                          "سنوات خبرة",
-                          style: TextStyle(
-                              color:darkmode! ?const Color.fromARGB(255, 206, 206, 206): const Color.fromARGB(255, 99, 98, 98),
+                              color: darkmode!
+                                  ? const Color.fromARGB(255, 206, 206, 206)
+                                  : const Color.fromARGB(255, 99, 98, 98),
                               fontWeight: FontWeight.bold),
                         ),
                       ],
@@ -261,26 +256,70 @@ color:darkmode! ? const Color.fromARGB(255, 206, 206, 206): const Color.fromARGB
                           decoration: BoxDecoration(
                               color: const Color.fromARGB(162, 192, 220, 252),
                               borderRadius: BorderRadius.circular(50)),
-                          child:  Icon(
-                            Icons.star,
+                          child: Icon(
+                            Icons.cases_outlined,
                             size: 28,
-                            color:darkmode!? const Color.fromARGB(255, 59, 144, 247):const Color(0xff1654A2),
+                            color: darkmode!
+                                ? const Color.fromARGB(255, 59, 144, 247)
+                                : const Color(0xff1654A2),
                           ),
                         ),
                         const SizedBox(
                           height: 10,
                         ),
-                         Text(
-                        "${widget.eval}+",
+                        Text(
+                          "${widget.exper}+",
                           style: TextStyle(
-                            color:darkmode!? const Color.fromARGB(255, 59, 144, 247):const Color(0xff1654A2),
+                              color: darkmode!
+                                  ? const Color.fromARGB(255, 59, 144, 247)
+                                  : const Color(0xff1654A2),
                               fontWeight: FontWeight.bold,
                               fontSize: 22),
                         ),
-                         Text(
+                        Text(
+                          "سنوات خبرة",
+                          style: TextStyle(
+                              color: darkmode!
+                                  ? const Color.fromARGB(255, 206, 206, 206)
+                                  : const Color.fromARGB(255, 99, 98, 98),
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(15),
+                          decoration: BoxDecoration(
+                              color: const Color.fromARGB(162, 192, 220, 252),
+                              borderRadius: BorderRadius.circular(50)),
+                          child: Icon(
+                            Icons.star,
+                            size: 28,
+                            color: darkmode!
+                                ? const Color.fromARGB(255, 59, 144, 247)
+                                : const Color(0xff1654A2),
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          "${widget.eval}+",
+                          style: TextStyle(
+                              color: darkmode!
+                                  ? const Color.fromARGB(255, 59, 144, 247)
+                                  : const Color(0xff1654A2),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 22),
+                        ),
+                        Text(
                           "تقييم",
                           style: TextStyle(
-                color:darkmode! ? const Color.fromARGB(255, 206, 206, 206): const Color.fromARGB(255, 99, 98, 98),                                fontWeight: FontWeight.bold),
+                              color: darkmode!
+                                  ? const Color.fromARGB(255, 206, 206, 206)
+                                  : const Color.fromARGB(255, 99, 98, 98),
+                              fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -292,39 +331,47 @@ color:darkmode! ? const Color.fromARGB(255, 206, 206, 206): const Color.fromARGB
                     child: Text(
                       " نبذة :",
                       style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 22,
-                              color:darkmode!? const Color.fromARGB(255, 59, 144, 247):const Color(0xff1654A2),
-                          ),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 22,
+                        color: darkmode!
+                            ? const Color.fromARGB(255, 59, 144, 247)
+                            : const Color(0xff1654A2),
+                      ),
                     )),
 
                 Container(
                   padding: const EdgeInsets.only(right: 40, left: 15),
                   child: Text(
-                    "الطبيب الذي درس طب الأسنان، ويعالجها في المجالات المختلفة والإختصاصات المختلفة. وطب الأسنان هو جزء من طب الفم، وهو فرع من فروع الطب التي تشارك في التقييم والوقاية والتشخيص والمعالجة الجراحية أو غير الجراحية لاضطرابات وأمراض وظروف تجويف الفم والوجه والفكين والمنطقة المتاخمة لها والمرتبطة بها وتأثيرها على الجسم البشري.",
+                    widget.desc,
                     style: TextStyle(
-                        fontSize: 17, color:darkmode! ? const Color.fromARGB(255, 206, 206, 206): const Color.fromARGB(255, 99, 98, 98)),
+                        fontSize: 17,
+                        color: darkmode!
+                            ? const Color.fromARGB(255, 206, 206, 206)
+                            : const Color.fromARGB(255, 99, 98, 98)),
                   ),
                 ),
                 // Text("data"),
 
                 Container(
-                    padding: const EdgeInsets.only(right: 40, top: 10, bottom: 20),
+                    padding:
+                        const EdgeInsets.only(right: 40, top: 10, bottom: 20),
                     child: Text(
                       " مواقع التواصل  :",
                       style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 22,
-                              color:darkmode!? const Color.fromARGB(255, 59, 144, 247):const Color(0xff1654A2),
-                          ),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 22,
+                        color: darkmode!
+                            ? const Color.fromARGB(255, 59, 144, 247)
+                            : const Color(0xff1654A2),
+                      ),
                     )),
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    InkWell(
+                    InkWell( 
                       onTap: () {
-                        launchUrl(Uri.parse('https://fasebook.com'));
+                        launchUrl(Uri.parse('https://${widget.facebook}'));
                       },
                       child: const CircleAvatar(
                         radius: 30,
@@ -333,7 +380,7 @@ color:darkmode! ? const Color.fromARGB(255, 206, 206, 206): const Color.fromARGB
                     ),
                     InkWell(
                       onTap: () {
-                        launchUrl(Uri.parse('mailto:amshoosh2@gmail.com'));
+                        launchUrl(Uri.parse('mailto:${widget.email}'));
                       },
                       child: const CircleAvatar(
                         radius: 30,
@@ -342,7 +389,7 @@ color:darkmode! ? const Color.fromARGB(255, 206, 206, 206): const Color.fromARGB
                     ),
                     InkWell(
                       onTap: () {
-                        launchUrl(Uri.parse('tel:967772913602'));
+                        launchUrl(Uri.parse('tel:${widget.phone}'));
                       },
                       child: const CircleAvatar(
                         radius: 25,
@@ -351,7 +398,7 @@ color:darkmode! ? const Color.fromARGB(255, 206, 206, 206): const Color.fromARGB
                     ),
                     InkWell(
                       onTap: () {
-                        launchUrl(Uri.parse('https://wa.me/967772913601'));
+                        launchUrl(Uri.parse('https://wa.me/${widget.phone}'));
                       },
                       child: const CircleAvatar(
                         radius: 30,

@@ -24,7 +24,8 @@ class DoctorItem extends StatelessWidget {
             height: 100,
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(100)),
             child: CircleAvatar(
-              backgroundImage: AssetImage(image, ),
+              // backgroundImage: AssetImage(image, ),
+              backgroundImage: NetworkImage('http://192.168.120.27:8000/images/doctor/${image}'),
             )
           ),
           Text(

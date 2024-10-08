@@ -30,6 +30,7 @@
   "do_you_want_to_delete_this_notification":"Do You Want To Delete This Notification?",
   "patient_name":"Patient Name",
   "patient_age":"Patient's Age",
+  "patient_number":"Patient's Number",
   "patient_gender":"Patient's Gender",
   "patient_problem":"Patient Problem",
   "booking_date":"Booking Date",

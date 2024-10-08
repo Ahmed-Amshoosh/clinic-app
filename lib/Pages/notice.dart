@@ -8,6 +8,13 @@ import 'package:graduation_project/widgets/Mybottom.dart';
 
 import '../controller/modeController.dart';
 import 'colors/colors.dart';
+import 'package:intl/intl.dart';
+
+// ipa
+
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class Notices extends StatefulWidget {
   const Notices({super.key});
@@ -67,6 +74,7 @@ class _NoticesState extends State<Notices> {
   void initState() {
     super.initState();
     getData();
+    fetchData();
     datauser();
   }
 
@@ -75,6 +83,26 @@ class _NoticesState extends State<Notices> {
   // } else {
   //   stateus = (datau[0]['statUs'] == 0) as int;
   // }
+
+  // -==================================================================
+  List<dynamic> notices = [];
+
+  // دالة لجلب البيانات من API
+  Future<void> fetchData() async {
+    final response =
+        await http.get(Uri.parse('http://192.168.120.27:8000/api/notices'));
+
+    if (response.statusCode == 200) {
+      // تحويل النص JSON إلى كائن Dart
+      setState(() {
+        notices = json.decode(response.body);
+      });
+    } else {
+      // في حال فشل الطلب
+      throw Exception('Failed to load data');
+    }
+  }
+  // =================================================================
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +127,8 @@ class _NoticesState extends State<Notices> {
                 ? const Center(
                     child: CircularProgressIndicator(),
                   )
-                : datau[0]['statUs'] == 1
+                // : datau[0]['statUs'] == 1
+                : false
                     ? IconButton(
                         onPressed: () {
                           showDialog(
@@ -218,84 +247,85 @@ class _NoticesState extends State<Notices> {
                             height: MediaQuery.of(context).size.height -
                                 120, // height: 100,
                             child: ListView.builder(
-                                itemCount: data.length,
+                                itemCount: notices.length,
                                 itemBuilder: (context, index) {
                                   return InkWell(
-                                    onTap: () async {
-                                      showDialog(
-                                          context: context,
-                                          builder: (context) => AlertDialog(
-                                                title: Icon(
-                                                  Icons.warning,
-                                                  size: 70,
-                                                  color: darkmode!
-                                                      ? const Color.fromARGB(
-                                                          255, 238, 238, 238)
-                                                      : const Color(0xff1652A4),
-                                                ),
-                                                content: Text(
-                                                  "do_you_want_to_delete_this_notification"
-                                                      .tr(),
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                      color: darkmode!
-                                                          ? const Color
-                                                              .fromARGB(255,
-                                                              238, 238, 238)
-                                                          : const Color(
-                                                              0xff1652A4),
-                                                      fontSize: 20,
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                ),
-                                                actions: [
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      MyButtom(
-                                                        title: "yes".tr(),
-                                                        onPressed: () async {
-                                                          await FirebaseFirestore
-                                                              .instance
-                                                              .collection(
-                                                                  "notice")
-                                                              .doc(data[index]
-                                                                  .id)
-                                                              .delete();
-                                                          setState(() {});
-                                                          Navigator.pushReplacement(
-                                                              context,
-                                                              MaterialPageRoute(
-                                                                  builder:
-                                                                      (context) =>
-                                                                          const Notices()));
-                                                        },
-                                                        bcColor: const Color(
-                                                            0xff1652A4),
-                                                      ),
-                                                      const SizedBox(
-                                                        width: 20,
-                                                      ),
-                                                      MyButtom(
-                                                          title: "no".tr(),
-                                                          onPressed: () {
-                                                            Navigator.pop(
-                                                                context);
-                                                          },
-                                                          bcColor: const Color(
-                                                              0xff1652A4)),
-                                                    ],
-                                                  )
-                                                ],
-                                                backgroundColor: darkmode!
-                                                    ? const Color.fromARGB(
-                                                        181, 41, 40, 40)
-                                                    : const Color.fromARGB(
-                                                        255, 238, 238, 238),
-                                              ));
-                                    },
+                                    // onTap: () async {
+                                    //   showDialog(
+                                    //       context: context,
+                                        
+                                    //       builder: (context) => AlertDialog(
+                                    //             title: Icon(
+                                    //               Icons.warning,
+                                    //               size: 70,
+                                    //               color: darkmode!
+                                    //                   ? const Color.fromARGB(
+                                    //                       255, 238, 238, 238)
+                                    //                   : const Color(0xff1652A4),
+                                    //             ),
+                                    //             content: Text(
+                                    //               "do_you_want_to_delete_this_notification"
+                                    //                   .tr(),
+                                    //               textAlign: TextAlign.center,
+                                    //               style: TextStyle(
+                                    //                   color: darkmode!
+                                    //                       ? const Color
+                                    //                           .fromARGB(255,
+                                    //                           238, 238, 238)
+                                    //                       : const Color(
+                                    //                           0xff1652A4),
+                                    //                   fontSize: 20,
+                                    //                   fontWeight:
+                                    //                       FontWeight.bold),
+                                    //             ),
+                                    //             actions: [
+                                    //               Row(
+                                    //                 mainAxisAlignment:
+                                    //                     MainAxisAlignment
+                                    //                         .center,
+                                    //                 children: [
+                                    //                   MyButtom(
+                                    //                     title: "yes".tr(),
+                                    //                     onPressed: () async {
+                                    //                       await FirebaseFirestore
+                                    //                           .instance
+                                    //                           .collection(
+                                    //                               "notice")
+                                    //                           .doc(data[index]
+                                    //                               .id)
+                                    //                           .delete();
+                                    //                       setState(() {});
+                                    //                       Navigator.pushReplacement(
+                                    //                           context,
+                                    //                           MaterialPageRoute(
+                                    //                               builder:
+                                    //                                   (context) =>
+                                    //                                       const Notices()));
+                                    //                     },
+                                    //                     bcColor: const Color(
+                                    //                         0xff1652A4),
+                                    //                   ),
+                                    //                   const SizedBox(
+                                    //                     width: 20,
+                                    //                   ),
+                                    //                   MyButtom(
+                                    //                       title: "no".tr(),
+                                    //                       onPressed: () {
+                                    //                         Navigator.pop(
+                                    //                             context);
+                                    //                       },
+                                    //                       bcColor: const Color(
+                                    //                           0xff1652A4)),
+                                    //                 ],
+                                    //               )
+                                    //             ],
+                                    //             backgroundColor: darkmode!
+                                    //                 ? const Color.fromARGB(
+                                    //                     181, 41, 40, 40)
+                                    //                 : const Color.fromARGB(
+                                    //                     255, 238, 238, 238),
+                                    //           ));
+                                    // },
                                     child: Container(
                                       margin: const EdgeInsets.all(5),
                                       decoration: BoxDecoration(
@@ -345,11 +375,19 @@ class _NoticesState extends State<Notices> {
                                                   padding:
                                                       const EdgeInsets.all(10),
                                                   child: Text(
-                                                    data[index]['title'],
+                                                    notices[index]['notice'],
                                                     maxLines: 7,
                                                     textAlign: TextAlign.right,
                                                   )),
-                                              Text(data[index]['time'])
+                                              Text(
+                                                DateFormat('yyyy/MM/dd')
+                                                    .format(
+                                                        DateTime.parse(notices[
+                                                                index][
+                                                            'created_at']) // Parse the String to DateTime
+                                                        ),
+                                              )
+                                              // Text(formatDate(notices[index]['created_at']))
                                               // ,Icon(Icons.abc),
                                             ],
                                           )

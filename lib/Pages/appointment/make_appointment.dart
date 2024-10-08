@@ -7,9 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:graduation_project/Pages/appointment/Appointment.dart';
 import 'package:graduation_project/widgets/Mybottom.dart';
 import 'package:graduation_project/widgets/textformfeildAppoint.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 import '../../controller/modeController.dart';
 import '../colors/colors.dart';
+
+
 
 // ignore: camel_case_types
 class Make_Appointment extends StatefulWidget {
@@ -25,6 +29,7 @@ class _Make_AppointmentState extends State<Make_Appointment> {
   TextEditingController userName = TextEditingController();
   TextEditingController userAge = TextEditingController();
   TextEditingController userGender = TextEditingController();
+  TextEditingController userPhone = TextEditingController();
   TextEditingController userProblem = TextEditingController();
   TextEditingController userNote = TextEditingController();
   String? gender;
@@ -47,6 +52,58 @@ class _Make_AppointmentState extends State<Make_Appointment> {
       setState(() {
         dateTimeController.text = d.toString().split(" ")[0];
       });
+    }
+  }
+
+  // Define your API URL here
+  final String apiUrl = 'http://192.168.120.27:8000/api/create-doctor';
+
+  Future<void> sendData() async {
+    // Prepare data to be sent
+    var data = {
+      'name': userName.text,
+      'age': userAge.text,
+      'date': dateTimeController.text,
+      'gender': gender,
+      'phone': userPhone.text,
+      'notice': userNote.text,
+      'problem': userProblem.text,
+      'user_id':FirebaseAuth.instance.currentUser!.uid
+    };
+
+    // Send POST request to the Laravel backend
+    try {
+      print(data);
+      var response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json', // Define the headers
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(data), // Convert the data to JSON format
+      );
+
+      if (response.statusCode == 201) {
+        // Successful response
+        var jsonResponse = jsonDecode(response.body);
+        print('Response data: ${jsonResponse['data']}');
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Appointment created successfully'),
+        ));
+      } else {
+        // Handle error response
+        print('Error: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Failed to create Appointment'),
+        ));
+      }
+    } catch (e) {
+      // Handle any exceptions
+      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('An error occurred'),
+      ));
     }
   }
 
@@ -146,10 +203,27 @@ class _Make_AppointmentState extends State<Make_Appointment> {
                     const SizedBox(
                       height: 20,
                     ),
+                     MyTextFormFieldAppoint(
+                        hinttext: "patient_number".tr(),
+                        controller: userPhone,
+                        readonly: false,
+                        // validator: (val) {
+                        //   return validInput(val!, 1, 3, "age");
+                        // },
+                        // validator: (val) => val!.isNotEmpty
+                        //     ? val.length > 3
+                        //         ? " لا ايمكن ان يكون هذا الحقل اكبر من 3  "
+                        //         : null
+                        //     : "لا ايمكن ان يكون هذا الحقل فارغ  ",
+                        myIcon: Icons.phone,
+                        maxline: 1),
+                    const SizedBox(
+                      height: 20,
+                    ),
 
-                    // const SizedBox(
-                    //   height: 10,
-                    // ),
+                    const SizedBox(
+                      height: 10,
+                    ),
                     MyTextFormFieldAppoint(
                         isNumber: false,
                         hinttext: "patient_problem".tr(),
@@ -289,18 +363,18 @@ class _Make_AppointmentState extends State<Make_Appointment> {
                   if (formstate.currentState!.validate()) {
                     loading = true;
                     setState(() {});
-                    await addUser();
+                    // await addUser();
+                    await sendData();
                     loading = false;
                     setState(() {});
-                    // Navigator.replace(
-                    //     oldRoute: MaterialPageRoute(
-                    //         builder: (context) => Home()),
-                    //     newRoute: MaterialPageRoute(
-                    //         builder: (context) => const Make_Appointment()),
+                    print('=================================================');
 
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>const MyAppointment() ,));
-                      
-                        
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const MyAppointment(),
+                        ));
+
                     showDialog(
                       // ignore: use_build_context_synchronously
                       context: context,
@@ -323,8 +397,8 @@ class _Make_AppointmentState extends State<Make_Appointment> {
                           height: 150,
                         ),
                         content: Text(
-                          
-                              "Thank_you_your_reservation_has_been_completed_successfully".tr(),
+                          "Thank_you_your_reservation_has_been_completed_successfully"
+                              .tr(),
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                               color: Color(0xff1652A4),
@@ -334,8 +408,7 @@ class _Make_AppointmentState extends State<Make_Appointment> {
                         backgroundColor: Colors.white,
                       ),
                     );
-
-                    
+                 
                   }
                 })
           ],

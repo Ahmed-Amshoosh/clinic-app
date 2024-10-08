@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -5,18 +7,23 @@ import 'package:flutter_html/flutter_html.dart';
 
 import '../../controller/modeController.dart';
 import '../colors/colors.dart';
+// import 'package:share_plus/share_plus.dart'; 
+import 'package:path_provider/path_provider.dart'; // To save the image locally
+import 'package:http/http.dart' as http;
 
 class Post extends StatefulWidget {
   const Post(
       {super.key,
       required this.time,
       required this.title,
-      required this.desc,
       required this.image,
-      required this.name});
+      required this.name,
+      required this.short_desc,
+      required this.big_desc});
   final String time;
   final String title;
-  final String desc;
+  final String short_desc;
+  final String big_desc;
   final String image;
   final String name;
   // late String time;
@@ -31,6 +38,45 @@ class _PostsState extends State<Post> {
   List data = [];
   List datau = [];
   bool loading = true;
+
+  File? _imageFile;
+  Future<void> _downloadImage(String imageUrl) async {
+    final response = await http.get(Uri.parse(imageUrl));
+    final documentDirectory = await getApplicationDocumentsDirectory();
+    final filePath =
+        '${documentDirectory.path}/shared_image.png'; // Saving image locally
+    final file = File(filePath);
+
+    if (response.statusCode == 200) {
+      await file.writeAsBytes(response.bodyBytes);
+      setState(() {
+        _imageFile = file;
+      });
+    } else {
+      print('Failed to download image');
+    }
+  }
+
+  // Future<void> _shareContent() async {
+  //   if (_imageFile != null) {
+  //     Share.shareFiles([_imageFile!.path],
+  //         text: widget.short_desc); // Share image and text
+  //   } else {
+  //     print('Image file is null');
+  //   }
+  // }
+
+  
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    _downloadImage(
+        'http://192.168.120.27:8000/images/${widget.image}'); // Download image when the widget is created
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +142,11 @@ class _PostsState extends State<Post> {
                                           fontWeight: FontWeight.bold,
                                           fontSize: 17)),
                                   Text(
-                                    widget.time,
+                                    DateFormat('yyyy/MM/dd')
+                                        .format(DateTime.parse(
+                                      widget.time,
+                                    ) // Parse the String to DateTime
+                                            ),
                                     style: const TextStyle(color: Colors.grey),
                                   ),
                                 ],
@@ -129,7 +179,12 @@ class _PostsState extends State<Post> {
                               // padding: const EdgeInsets.all(30),
                               // width: 90,
                               // alignment: Alignment.topRight,
-                              child: Html(data: widget.desc)),
+                              child: Html(data: widget.short_desc)),
+                          Container(
+                              padding: const EdgeInsets.only(top: 30),
+                              // width: 90,
+                              // alignment: Alignment.topRight,
+                              child: Html(data: widget.big_desc)),
                           // Text(
                           //   widget.desc,
                           //   style: TextStyle(
@@ -148,12 +203,23 @@ class _PostsState extends State<Post> {
                             borderRadius: BorderRadius.circular(20),
                             child: Image.network(
                               // 'http://192.168.31.97:8000/images//${widget.image}',
-                              widget.image,
+                              // widget.image,
+                              'http://192.168.120.27:8000/images/${widget.image}',
                               height: 200,
                               width: double.infinity,
                               fit: BoxFit.fill,
                             ),
                           ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          // ElevatedButton(
+                          //   onPressed: () {
+                          //     // Share image and text
+                          //     // _shareContent();
+                          //   },
+                          //   child: Text('Share Post'),
+                          // ),
                           const SizedBox(
                             height: 10,
                           ),
